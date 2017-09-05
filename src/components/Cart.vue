@@ -66,7 +66,7 @@
                     </div>
                   </div>
                   <div class="cart-tab-2">
-                    <div class="item-price">{{ item.productPrice }}</div>
+                    <div class="item-price">{{ item.productPrice | formatMoney}}</div>
                   </div>
                   <div class="cart-tab-3">
                     <div class="item-quantity">
@@ -81,7 +81,7 @@
                     </div>
                   </div>
                   <div class="cart-tab-4">
-                    <div class="item-price-total">{{ item.productPrice * item.productQuantity }}</div>
+                    <div class="item-price-total">{{ item.productPrice * item.productQuantity | formatMoney }}</div>
                   </div>
                   <div class="cart-tab-5">
                     <div class="cart-item-operation">
@@ -114,7 +114,7 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price"></span>
+                合计: <span class="total-price"></span>
               </div>
               <div class="next-btn-wrap">
                 <a href="javascrit:;" class="btn btn--red" style="width: 200px">结账</a>
@@ -155,23 +155,23 @@
       }
     },
     filters: {
-
+      formatMoney: function (value) {
+        return '￥' + value.toFixed(2)
+      }
     },
     mounted: function () {
       this.cartList()
     },
     methods: {
       cartList: function () {
-        var self = this
         axios.get('/static/data/cartData.json')
-          .then(function (response) {
-            console.log(response)
+          .then(response => {
             let result = response.data.result
-            self.productList = result.list
-            self.totalMoney = result.totalMoney
+            this.productList = result.list
+            this.totalMoney = result.totalMoney
           })
           .catch(function (error) {
-            self.error = error
+            this.error = error
           })
       }
     }
