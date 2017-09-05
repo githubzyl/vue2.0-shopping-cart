@@ -170,9 +170,6 @@
             this.productList = result.list
             this.totalMoney = result.totalMoney
           })
-          .catch(function (error) {
-            this.error = error
-          })
       }
     }
   }
@@ -180,9 +177,9 @@
 
 <style scoped>
 
-  @import "/static/css/base.css";
-  @import "/static/css/checkout.css";
-  @import "/static/css/modal.css";
+  @import "../../static/css/base.css";
+  @import "../../static/css/checkout.css";
+  @import "../../static/css/modal.css";
 
   .quentity input {
     width: 40px;
