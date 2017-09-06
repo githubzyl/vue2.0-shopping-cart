@@ -47,7 +47,7 @@
                 <li v-for="(item, index) in productList">
                   <div class="cart-tab-1">
                     <div class="cart-item-check">
-                      <a href="javascript:void 0" class="item-check-btn">
+                      <a href="javascript:;" class="item-check-btn" v-bind:class="{'check' : item.checked}" @click="selectProduct(item)">
                         <svg class="icon icon-ok"><use xlink:href="#icon-ok"></use></svg>
                       </a>
                     </div>
@@ -72,9 +72,9 @@
                     <div class="item-quantity">
                       <div class="select-self select-self-open">
                         <div class="quantity">
-                          <a href="javascript:void 0"></a>
-                          <input type="text" value="0" disabled v-model="item.productQuantity">
-                          <a href="javascript:void 0"></a>
+                          <a href="javascript:;" v-on:click="changeQuantity(item, -1)">-</a>
+                          <input style="width: 80px;text-align: center;" type="text" value="0" v-model="item.productQuantity" disabled>
+                          <a href="javascript:;" @click="changeQuantity(item, 1)">+</a>
                         </div>
                       </div>
                       <div class="item-stock">有货</div>
@@ -99,15 +99,15 @@
           <div class="cart-foot-wrap">
             <div class="cart-foot-l">
               <div class="item-all-check">
-                <a href="javascript:void 0">
-                    <span class="item-check-btn" >
+                <a href="javascript:;" @click="selectAll(true)">
+                    <span class="item-check-btn" :class="{'check': checkAll }">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"></use></svg>
                     </span>
                   <span>全选</span>
                 </a>
               </div>
-              <div class="item-all-del">
-                <a href="javascript:void 0" class="item-del-btn">
+              <div class="item-all-del" style="margin-left: 10px;">
+                <a href="javascript:;" class="item-del-btn" @click="selectAll(false)">
                   <span>取消全选</span>
                 </a>
               </div>
@@ -151,7 +151,9 @@
     data () {
       return {
         productList: [],
-        totalMoney: 0
+        totalMoney: 0,
+        checkAll: false,
+        checkCount: 0
       }
     },
     filters: {
@@ -170,6 +172,49 @@
             this.productList = result.list
             this.totalMoney = result.totalMoney
           })
+      },
+      changeQuantity: function (item, type) {
+        if (type < 0) {
+          item.productQuantity--
+        } else {
+          item.productQuantity++
+        }
+        if (item.productQuantity <= 1) {
+          item.productQuantity = 1
+        }
+      },
+      selectProduct: function (item) {
+        if (typeof item.checked === 'undefined') {
+          this.$set(item, 'checked', true)
+        } else {
+          item.checked = !item.checked
+        }
+        if (item.checked) {
+          this.checkCount++
+        } else {
+          this.checkCount--
+        }
+        if (this.checkCount < this.productList.length) {
+          this.checkAll = false
+        }
+        if (this.checkCount === this.productList.length) {
+          this.checkAll = true
+        }
+      },
+      selectAll: function (flag) {
+        this.checkAll = flag
+        this.productList.forEach((item, index) => {
+          if (typeof item.checked === 'undefined') {
+            this.$set(item, 'checked', this.checkAll)
+          } else {
+            item.checked = this.checkAll
+          }
+        })
+        if (flag) {
+          this.checkCount = this.productList.length
+        } else {
+          this.checkCount = 0
+        }
       }
     }
   }
