@@ -172,7 +172,7 @@
     },
     methods: {
       cartList: function () {
-        axios.get('/static/data/cartData.json')
+        axios.get('https://githubzyl.github.io/vue2.0-shopping-cart/static/data/cartData.json')
           .then(response => {
             let result = response.data.result
             this.productList = result.list
