@@ -207,7 +207,7 @@
     },
     methods: {
       addrList: function () {
-        axios.get('https://githubzyl.github.io/vue2.0-shopping-cart/static/data/address.json')
+        axios.get('/static/data/address.json')
           .then(response => {
             let result = response.data.result
             this.addressList = result
