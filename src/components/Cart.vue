@@ -85,7 +85,7 @@
                   </div>
                   <div class="cart-tab-5">
                     <div class="cart-item-operation">
-                      <a href="javascript:void 0" class="item-edit-btn">
+                      <a href="javascript:;" class="item-edit-btn" @click="delConfirm(item)">
                         <svg class="icon icon-del"><use xlink:href="#icon-del" ></use></svg>
                       </a>
                     </div>
@@ -114,38 +114,40 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                合计: <span class="total-price"></span>
+                合计: <span class="total-price">{{ totalMoney | formatMoney }}</span>
               </div>
               <div class="next-btn-wrap">
-                <a href="javascrit:;" class="btn btn--red" style="width: 200px">结账</a>
+                <a href="javascrit:;" class="btn btn--red" style="width: 200px" @click="goAddressPage()">结账</a>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="md-modal modal-msg md-modal-transition" id="showModal">
+      <div class="md-modal modal-msg md-modal-transition" id="showModal" :class="{'md-show': delShow}">
         <div class="md-modal-inner">
           <div class="md-top">
-            <button class="md-close">关闭</button>
+            <button class="md-close" @click="cancelDelProduct()">关闭</button>
           </div>
           <div class="md-content">
             <div class="confirm-tips">
               <p id="cusLanInfo">你确认删除此订单信息吗?</p>
             </div>
             <div class="btn-wrap col-2">
-              <button class="btn btn--m" id="btnModalConfirm">Yes</button>
-              <button class="btn btn--m btn--red" id="btnModalCancel">No</button>
+              <button class="btn btn--m" id="btnModalConfirm" @click="delProduct()">Yes</button>
+              <button class="btn btn--m btn--red" id="btnModalCancel" @click="cancelDelProduct()">No</button>
             </div>
           </div>
         </div>
       </div>
+      <div class="md-overlay" v-if="delShow"></div>
     </div>
   </div>
 </template>
 
 <script>
   import axios from 'axios'
+  import router from '../router'
   export default {
     name: 'cart',
     data () {
@@ -153,7 +155,9 @@
         productList: [],
         totalMoney: 0,
         checkAll: false,
-        checkCount: 0
+        checkCount: 0,
+        delShow: false,
+        currProduct: ''
       }
     },
     filters: {
@@ -162,7 +166,9 @@
       }
     },
     mounted: function () {
-      this.cartList()
+      this.$nextTick(function () {
+        this.cartList()
+      })
     },
     methods: {
       cartList: function () {
@@ -170,18 +176,19 @@
           .then(response => {
             let result = response.data.result
             this.productList = result.list
-            this.totalMoney = result.totalMoney
+            // this.totalMoney = result.totalMoney
           })
       },
       changeQuantity: function (item, type) {
+        if (item.productQuantity <= 1) {
+          item.productQuantity = 1
+        }
         if (type < 0) {
           item.productQuantity--
         } else {
           item.productQuantity++
         }
-        if (item.productQuantity <= 1) {
-          item.productQuantity = 1
-        }
+        this.calcTotalMoney()
       },
       selectProduct: function (item) {
         if (typeof item.checked === 'undefined') {
@@ -200,6 +207,7 @@
         if (this.checkCount === this.productList.length) {
           this.checkAll = true
         }
+        this.calcTotalMoney()
       },
       selectAll: function (flag) {
         this.checkAll = flag
@@ -215,6 +223,31 @@
         } else {
           this.checkCount = 0
         }
+        this.calcTotalMoney()
+      },
+      calcTotalMoney: function () {
+        this.totalMoney = 0
+        this.productList.forEach((item, index) => {
+          if (item.checked) {
+            this.totalMoney += item.productQuantity * item.productPrice
+          }
+        })
+      },
+      delConfirm: function (item) {
+        this.delShow = true
+        this.currProduct = item
+      },
+      delProduct: function () {
+        let index = this.productList.indexOf(this.currProduct)
+        this.productList.splice(index, 1)
+        this.delShow = false
+      },
+      cancelDelProduct: function () {
+        this.delShow = false
+        this.currProduct = ''
+      },
+      goAddressPage: function () {
+        router.push({path: '/address'})
       }
     }
   }
