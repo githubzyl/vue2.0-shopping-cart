@@ -50,7 +50,7 @@
                   <dd class="tel">{{ item.tel }}</dd>
                 </dl>
                 <div class="addr-opration addr-edit">
-                  <a href="javascript:;" class="addr-edit-btn">
+                  <a href="javascript:;" class="addr-edit-btn" @click="editAddress(item)">
                     <svg class="icon icon-edit"><use xlink:href="#icon-edit"></use></svg>
                   </a>
                 </div>
@@ -65,7 +65,7 @@
                 <div class="addr-opration addr-default" v-if="item.isDefault">默认地址</div>
               </li>
 
-              <li class="addr-new">
+              <li class="addr-new" @click="addAddress()">
                 <div class="add-new-inner">
                   <i class="icon-add">
                     <svg class="icon icon-add"><use xlink:href="#icon-add"></use></svg>
@@ -124,10 +124,10 @@
             </div>
           </div>
         </div>
-        <div class="md-modal modal-msg md-modal-transition" >
+        <div class="md-modal modal-msg md-modal-transition" :class="{'md-show': addArrressShow}">
           <div class="md-modal-inner">
             <div class="md-top">
-              <button class="md-close">关闭</button>
+              <button class="md-close"  @click="addArrressShow = false">关闭</button>
             </div>
             <div class="md-content">
               <div class="confirm-tips">
@@ -137,7 +137,7 @@
                   </label>
                   <div class="md-form-item__content" style="margin-left: 80px;">
                     <div  class="el-input">
-                      <input type="text" autocomplete="off" class="md-input__inner">
+                      <input ref="username" type="text" autocomplete="off" class="md-input__inner" :value="currEditItem.userName">
                     </div>
                   </div>
                 </div>
@@ -147,7 +147,7 @@
                   </label>
                   <div class="md-form-item__content" style="margin-left: 80px;">
                     <div  class="el-input">
-                      <input type="text" autocomplete="off" class="md-input__inner">
+                      <input ref="streetname" type="text" autocomplete="off" class="md-input__inner" :value="currEditItem.streetName">
                     </div>
                   </div>
                 </div>
@@ -157,14 +157,14 @@
                   </label>
                   <div class="md-form-item__content" style="margin-left: 80px;">
                     <div  class="el-input">
-                      <input type="text" autocomplete="off" class="md-input__inner">
+                      <input ref="tel" type="text" autocomplete="off" class="md-input__inner" :value="currEditItem.tel">
                     </div>
                   </div>
                 </div>
               </div>
               <div class="btn-wrap col-2">
-                <button class="btn btn--s" id="btnModalConfirms">保存</button>
-                <button class="btn btn--s btn--red" id="btnModalCancels">取消</button>
+                <button class="btn btn--s" id="btnModalConfirms" @click="saveAddress()">保存</button>
+                <button class="btn btn--s btn--red" id="btnModalCancels" @click="addArrressShow = false">取消</button>
               </div>
             </div>
           </div>
@@ -172,6 +172,7 @@
         <!--         <div class="md-overlay" id="showOverLay"></div>
          -->
       </div>
+      <div class="md-overlay" v-if="addArrressShow"></div>
       <div class="md-overlay" v-if="delShow"></div>
     </div>
   </div>
@@ -189,7 +190,9 @@
         shippingMethod: 1,
         showModalw: false,
         delShow: false,
-        currItem: ''
+        currItem: '',
+        addArrressShow: false,
+        currEditItem: {}
       }
     },
     filters: {
@@ -229,14 +232,37 @@
           }
         })
       },
-      /*
       addAddress: function () {
-
+        this.addArrressShow = true
+        this.currEditItem = {}
       },
-      editAddress: function () {
-
+      editAddress: function (item) {
+        this.addArrressShow = true
+        this.currEditItem = item
       },
-      */
+      saveAddress: function () {
+        this.currEditItem.userName = this.$refs.username.value
+        this.currEditItem.streetName = this.$refs.streetname.value
+        this.currEditItem.tel = this.$refs.tel.value
+        if (this.currEditItem.addressId) { // 编辑
+          for (var i = 0, length = this.addressList.length; i < length; i++) {
+            let itemId = this.addressList[i].addressId
+            if (this.currEditItem.addressId === itemId) {
+              this.addressList[i] = this.currEditItem
+            }
+          }
+        } else { // 新增
+          this.currEditItem.addressId = this.nextAddressId()
+          this.addressList.push(this.currEditItem)
+        }
+        // 保存之后将当前编辑对象置空
+        this.currEditItem = {}
+        this.limitNum = this.addressList.length
+        this.addArrressShow = false
+      },
+      nextAddressId: function () {
+        return this.addressList[this.addressList.length - 1].addressId
+      },
       delConfirm: function (item) {
         this.delShow = true
         this.currItem = item
